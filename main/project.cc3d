@@ -1,0 +1,5 @@
+<Simulation version="4.2.5">
+   <XMLScript Type="XMLScript">Simulation/project.xml</XMLScript>
+   <PythonScript Type="PythonScript">Simulation/project.py</PythonScript>
+   <Resource Type="Python">Simulation/projectSteppables.py</Resource>
+</Simulation>

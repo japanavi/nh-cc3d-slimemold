@@ -1,0 +1,197 @@
+
+<!-- Created: June 2011 -->
+<!-- Author: Niklas Semmler -->
+<!-- Updated by: Joshua Apanavicius -->
+<!-- Last Updated: May 2022 -->
+
+
+<CompuCell3D Revision="20210612" Version="4.2.5">
+   
+   <Metadata>
+      
+      <!-- Basic properties simulation -->
+      <NumberOfProcessors>1</NumberOfProcessors>
+      <DebugOutputFrequency>10</DebugOutputFrequency>
+      <!-- <NonParallelModule Name="Potts"/> -->
+   </Metadata>
+   
+   <Potts>
+      <!-- Basic properties of CPM (GGH) algorithm -->
+      <Dimensions x="100" y="100" z="1"/>
+      <!-- <Dimensions x="200" y="300" z="1"/> -->
+      <Steps id="N_steps">20000</Steps>
+      <Temperature>8.0</Temperature>
+      <NeighborOrder>1</NeighborOrder>
+   </Potts>
+   
+   <Plugin Name="CellType">
+      
+      <!-- Listing all cell types in the simulation -->
+      <CellType TypeId="0" TypeName="Medium"/>
+      <CellType Freeze="" TypeId="1" TypeName="FoodSource"/>
+      <CellType TypeId="2" TypeName="SlimeMold"/>
+      <CellType Freeze="" TypeId="3" TypeName="Wall"/>
+   </Plugin>
+   
+   <Plugin Name="VolumeLocalFlex"/>
+   
+   <Plugin Name="CenterOfMass">
+      
+      <!-- Module tracking center of mass of each cell -->
+   </Plugin>
+   
+   <Plugin Name="NeighborTracker">
+      
+      <!-- Module tracking neighboring cells of each cell -->
+   </Plugin>
+   
+   <Plugin Name="Connectivity">
+    <Penalty id="sm_connect" Type="SlimeMold">50000</Penalty>
+   </Plugin>
+   
+   <Plugin Name="Contact">
+      <!-- Specification of adhesion energies -->
+      <Energy Type1="Medium" Type2="Medium">0.0</Energy>
+      <Energy Type1="Medium" Type2="FoodSource">0.0</Energy>
+      <Energy Type1="Medium" Type2="SlimeMold">14.0</Energy>
+      <Energy Type1="Medium" Type2="Wall">0.0</Energy>
+      <Energy Type1="FoodSource" Type2="FoodSource">0.0</Energy>
+      <Energy Type1="FoodSource" Type2="SlimeMold">1.0</Energy>
+      <Energy Type1="FoodSource" Type2="Wall">50.0</Energy>
+      <Energy Type1="SlimeMold" Type2="SlimeMold">14.0</Energy>
+      <Energy Type1="SlimeMold" Type2="Wall">50.0</Energy>
+      <Energy Type1="Wall" Type2="Wall">0.0</Energy>
+      <NeighborOrder>2</NeighborOrder>
+   </Plugin>
+   
+   <Plugin Name="Chemotaxis">
+      
+      <!-- You may repeat ChemicalField element for each chemical field declared in the PDE solvers -->
+      <!-- Specification of chemotaxis properties of select cell types. -->
+      <ChemicalField Source="DiffusionSolverFE" Name="ATTR">
+         <ChemotaxisByType id="attr_ele" Lambda="300.0" SaturationLinearCoef="0.0007" Type="SlimeMold"/>
+      </ChemicalField>
+      <ChemicalField Source="DiffusionSolverFE" Name="REP">
+         <ChemotaxisByType id="rep_ele" Lambda="-200.0" SaturationLinearCoef="0.005" Type="SlimeMold"/>
+      </ChemicalField>
+   </Plugin>
+   
+   <Plugin Name="Secretion">
+      
+      <!-- Specification of secretion properties of select cell types. -->
+      <!-- You may repeat Field element for each chemical field declared in the PDE solvers -->
+      <!-- Specification of secretion properties of individual cells can be done in Python -->
+      <Field Name="ATTR">
+         <Secretion Type="FoodSource">65.0</Secretion>
+         <Secretion Type="SlimeMold">2.0</Secretion>
+         <SecretionOnContact SecreteOnContactWith="FoodSource" Type="SlimeMold">40.0</SecretionOnContact>
+      </Field>
+      <Field Name="REP">
+         <Secretion Type="Wall">40.0</Secretion>
+      </Field>
+   </Plugin>
+   
+   <Steppable Type="DiffusionSolverFE">
+      
+      <!-- Specification of PDE solvers -->
+      <DiffusionField Name="ATTR">
+         <DiffusionData>
+            <FieldName>ATTR</FieldName>
+            <GlobalDiffusionConstant>0.23</GlobalDiffusionConstant>
+            <GlobalDecayConstant>0.09</GlobalDecayConstant>
+            <!-- <GlobalDecayConstant>0.15</GlobalDecayConstant> -->
+            <!-- Additional options are: -->
+            <!-- <InitialConcentrationExpression>x*y</InitialConcentrationExpression> -->
+            <!-- <ConcentrationFileName>INITIAL CONCENTRATION FIELD - typically a file with path Simulation/NAME_OF_THE_FILE.txt</ConcentrationFileName> -->
+            <!-- <DiffusionCoefficient CellType="FoodSource">0.1</DiffusionCoefficient> -->
+            <!-- <DiffusionCoefficient CellType="SlimeMold">0.1</DiffusionCoefficient> -->
+            <!-- <DiffusionCoefficient CellType="Wall">0.1</DiffusionCoefficient> -->
+            <!-- <DecayCoefficient CellType="FoodSource">0.0001</DecayCoefficient> -->
+            <!-- <DecayCoefficient CellType="SlimeMold">0.0001</DecayCoefficient> -->
+            <!-- <DecayCoefficient CellType="Wall">0.0001</DecayCoefficient> -->
+            <DoNotDiffuseTo>Wall</DoNotDiffuseTo>
+         </DiffusionData>
+         <!-- <SecretionData> -->
+            <!-- When secretion is defined inside DissufionSolverFE all secretion constants are scaled automaticaly to account for the extra calls to the diffusion step when handling large diffusion constants -->
+            
+            <!-- Uniform secretion Definition -->
+            <!-- <Secretion Type="FoodSource">0.1</Secretion> -->
+            <!-- <Secretion Type="SlimeMold">0.1</Secretion> -->
+            <!-- <Secretion Type="Wall">0.1</Secretion> -->
+            <!-- <SecretionOnContact SecreteOnContactWith="FoodSource,SlimeMold,Wall" Type="Wall">0.2</SecretionOnContact> -->
+            <!-- <ConstantConcentration Type="Wall">0.1</ConstantConcentration> -->
+         <!-- </SecretionData> -->
+         <BoundaryConditions>
+            <Plane Axis="X">
+               <ConstantValue PlanePosition="Min" Value="10.0"/>
+               <ConstantValue PlanePosition="Max" Value="5.0"/>
+               <!-- Other options are (examples): -->
+               <!-- <Periodic/> -->
+               <!-- <ConstantDerivative PlanePosition="Min" Value="10.0"/> -->
+            </Plane>
+            <Plane Axis="Y">
+               <ConstantDerivative PlanePosition="Min" Value="10.0"/>
+               <ConstantDerivative PlanePosition="Max" Value="5.0"/>
+               <!-- Other options are (examples): -->
+               <!-- <Periodic/> -->
+               <!-- <ConstantValue PlanePosition="Min" Value="10.0"/> -->
+            </Plane>
+         </BoundaryConditions>
+      </DiffusionField>
+      <DiffusionField Name="REP">
+         <DiffusionData>
+            <FieldName>REP</FieldName>
+            <GlobalDiffusionConstant>0.1</GlobalDiffusionConstant>
+            <GlobalDecayConstant>0.15</GlobalDecayConstant>
+            <!-- <GlobalDecayConstant>0.09</GlobalDecayConstant> -->
+            <!-- Additional options are: -->
+            <!-- <InitialConcentrationExpression>x*y</InitialConcentrationExpression> -->
+            <!-- <ConcentrationFileName>INITIAL CONCENTRATION FIELD - typically a file with path Simulation/NAME_OF_THE_FILE.txt</ConcentrationFileName> -->
+            <!-- <DiffusionCoefficient CellType="FoodSource">0.1</DiffusionCoefficient> -->
+            <!-- <DiffusionCoefficient CellType="SlimeMold">0.1</DiffusionCoefficient> -->
+            <!-- <DiffusionCoefficient CellType="Wall">0.1</DiffusionCoefficient> -->
+            <!-- <DecayCoefficient CellType="FoodSource">0.0001</DecayCoefficient> -->
+            <!-- <DecayCoefficient CellType="SlimeMold">0.0001</DecayCoefficient> -->
+            <!-- <DecayCoefficient CellType="Wall">0.0001</DecayCoefficient> -->
+            <DoNotDiffuseTo>FoodSource</DoNotDiffuseTo>
+         </DiffusionData>
+         <!-- <SecretionData> -->
+            <!-- When secretion is defined inside DissufionSolverFE all secretion constants are scaled automaticaly to account for the extra calls to the diffusion step when handling large diffusion constants -->
+            
+            <!-- Uniform secretion Definition -->
+            <!-- <Secretion Type="FoodSource">0.1</Secretion> -->
+            <!-- <Secretion Type="SlimeMold">0.1</Secretion> -->
+            <!-- <Secretion Type="Wall">0.1</Secretion> -->
+            <!-- <SecretionOnContact SecreteOnContactWith="FoodSource,SlimeMold,Wall" Type="Wall">0.2</SecretionOnContact> -->
+            <!-- <ConstantConcentration Type="Wall">0.1</ConstantConcentration> -->
+         <!-- </SecretionData> -->
+         <BoundaryConditions>
+            <Plane Axis="X">
+               <ConstantValue PlanePosition="Min" Value="10.0"/>
+               <ConstantValue PlanePosition="Max" Value="5.0"/>
+               <!-- Other options are (examples): -->
+               <!-- <Periodic/> -->
+               <!-- <ConstantDerivative PlanePosition="Min" Value="10.0"/> -->
+            </Plane>
+            <Plane Axis="Y">
+               <ConstantDerivative PlanePosition="Min" Value="10.0"/>
+               <ConstantDerivative PlanePosition="Max" Value="5.0"/>
+               <!-- Other options are (examples): -->
+               <!-- <Periodic/> -->
+               <!-- <ConstantValue PlanePosition="Min" Value="10.0"/> -->
+            </Plane>
+         </BoundaryConditions>
+      </DiffusionField>
+   </Steppable>
+   
+   <Plugin Name="PixelTracker">
+   
+   <!-- Module tracking pixels of each cell -->
+   </Plugin>
+
+   
+   <!-- <Steppable Type="PIFInitializer"> -->
+        <!-- <PIFName>maps/fourFSB.pif</PIFName> -->
+   <!-- </Steppable> -->
+   
+</CompuCell3D>

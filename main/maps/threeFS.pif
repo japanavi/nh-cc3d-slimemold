@@ -1,0 +1,8 @@
+1 FoodSource  2  6 20 24 0 0
+2 FoodSource 93 97 20 24 0 0
+3 FoodSource 45 49 93 97 0 0
+4 SlimeMold   7 11 20 24 0 0
+5 Wall  0  1  0 99 0 0
+6 Wall 98 99  0 99 0 0
+7 Wall  0 99  0  1 0 0
+8 Wall  0 99 98 99 0 0
