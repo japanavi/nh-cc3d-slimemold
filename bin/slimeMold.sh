@@ -25,7 +25,7 @@ echo ${TOOL_HOME}
 export LC_NUMERIC="C.UTF-8"
 
 
-CC3D_TOOL_NAME=slimeMold
+CC3D_TOOL_NAME=slimemold
 CC3D_TOOL_FILENAME=project.cc3d
 # CC3D_DEMO_PREFIX=Demos/BookChapterDemos_ComputationalMethodsInCellBiology/VascularTumor/
 USER_DEMO_PATH=$HOME/CompuCell3D_Demos/${CC3D_TOOL_NAME}
