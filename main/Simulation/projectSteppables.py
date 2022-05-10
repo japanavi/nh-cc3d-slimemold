@@ -5,12 +5,12 @@ Updated by: Joshua Apanavicius
 Last Updated: May 2022
 """
 
-from cc3d.core.PySteppables import *
 import math
 import random
-
 from pathlib import Path
 from typing import List
+
+from cc3d.core.PySteppables import *
 
 
 class projectSteppable(SteppableBasePy):
@@ -46,6 +46,15 @@ class SecretionSteppable(SteppableBasePy):
         p = Path(path)
         return [child.name for child in p.iterdir() if child.suffix == ".pif"]
 
+    def _get_cell_type(self, cell_type: str):
+        type_map = {
+            "Wall": self.WALL,
+            "FoodSource": self.FOODSOURCE,
+            "SlimeMold": self.SLIMEMOLD
+        }
+
+        return type_map[cell_type]
+
     def _gen_from_pif(self, path: str) -> None:
         c_id = 0
         c_type = 1
@@ -68,7 +77,7 @@ class SecretionSteppable(SteppableBasePy):
                         self.cell_field[int(c_line[x_start]):int(c_line[x_finish]), int(c_line[y_start]):int(c_line[y_finish]), 0] = cell
                         
                     else:
-                        cell = self.new_cell(getattr(self.cell_type, c_line[c_type]))
+                        cell = self.new_cell(self._get_cell_type(c_line[c_type]))
                         self.cell_field[int(c_line[x_start]):int(c_line[x_finish]), int(c_line[y_start]):int(c_line[y_finish]), 0] = cell
                         ids[c_line[c_id]] = cell.id
 
